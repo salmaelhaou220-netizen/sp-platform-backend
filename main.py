@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional
-import google.generativeai as genai
+from typing import Optional
 import os, json, time
+from mistralai import Mistral
 
 app = FastAPI(title="SP Platform API v5.3", version="5.3.0")
 
@@ -15,8 +15,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-2.5-flash")
+client = Mistral(api_key=os.environ.get("MISTRAL_API_KEY"))
+MODEL = "mistral-small-latest"
 
 SYSTEM_PROMPT_GENERATION = """====================================================================
 SYSTEM PROMPT V5.3 — GÉNÉRATEUR DE SITUATIONS-PROBLÈMES (SP)
@@ -747,12 +747,19 @@ class EvaluateRequest(BaseModel):
     seance: str
     situation_probleme: str
 
-def call_gemini(prompt: str, system: str, retries: int = 3):
+def call_mistral(user_prompt: str, system_prompt: str, retries: int = 3):
     for attempt in range(retries):
         try:
-            full = f"{system}\n\n{prompt}"
-            response = model.generate_content(full)
-            raw = response.text.strip()
+            response = client.chat.complete(
+                model=MODEL,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=0.7,
+                max_tokens=8000,
+            )
+            raw = response.choices[0].message.content.strip()
             if raw.startswith("```"):
                 parts = raw.split("```")
                 raw = parts[1] if len(parts) > 1 else raw
@@ -765,12 +772,12 @@ def call_gemini(prompt: str, system: str, retries: int = 3):
             time.sleep(2 ** attempt)
         except Exception as e:
             if attempt == retries - 1:
-                raise HTTPException(status_code=503, detail=f"Erreur Gemini: {str(e)}")
+                raise HTTPException(status_code=503, detail=f"Erreur Mistral: {str(e)}")
             time.sleep(2 ** attempt)
 
 @app.get("/")
 def root():
-    return {"status": "ok", "version": "5.3.0", "message": "SP Platform API is running"}
+    return {"status": "ok", "version": "5.3.0", "model": "mistral-large-latest", "message": "SP Platform API is running"}
 
 @app.get("/sequences")
 def get_sequences():
@@ -797,11 +804,12 @@ def generate_sp(req: GenerateRequest):
             "type_sp": req.type_sp,
             "langue": req.langue
         }, ensure_ascii=False)
-    result = call_gemini(prompt, SYSTEM_PROMPT_GENERATION)
+
+    result = call_mistral(prompt, SYSTEM_PROMPT_GENERATION)
     return {"success": True, "data": result}
 
 @app.post("/evaluate-sp")
 def evaluate_sp(req: EvaluateRequest):
     prompt = f"MODULE : {req.module}\nSEANCE : {req.seance}\nSITUATION-PROBLEME :\n{req.situation_probleme}"
-    result = call_gemini(prompt, SYSTEM_PROMPT_EVALUATION)
+    result = call_mistral(prompt, SYSTEM_PROMPT_EVALUATION)
     return {"success": True, "data": result}
