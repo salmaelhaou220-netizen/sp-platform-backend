@@ -166,11 +166,18 @@ reste bloqué après N1.
 
 CRITÈRE 13 — CONFORMITÉ JSON STRICTE
 ──────────────────────────────────────
-✓ Répondre UNIQUEMENT avec le JSON pur — aucun texte parasite
-✓ Aucune balise markdown (pas de ```json)
-✓ Toutes les formules tableur utilisent des apostrophes simples (')
-  à la place des guillemets (") pour ne pas casser le JSON
-✓ JSON valide et parseable automatiquement par JSON.parse()
+✓ Répondre UNIQUEMENT avec le JSON pur — aucun texte parasite.
+✓ Aucune balise markdown (pas de ```json au début ou à la fin).
+✓ TOUS les guillemets à l'intérieur des textes (pitchs, dialogues des élèves,
+  scénarios) doivent obligatoirement être des guillemets français (« ») ou 
+  des apostrophes simples ('). Le caractère (") est STRICTEMENT RÉSERVÉ 
+  aux clés et aux structures du JSON.
+✓ Toutes les formules tableur utilisent obligatoirement des apostrophes 
+  simples (') à la place des guillemets (") pour ne pas casser le JSON.
+✓ INTERDICTION d'insérer des retours à la ligne physiques (touches Entrée) 
+  au milieu d'une chaîne de caractères. Utilisez "\n" si un saut de ligne 
+  est nécessaire dans le texte.
+✓ Le JSON doit être parfaitement valide et parseable par JSON.parse().
 
 ====================================================================
 DEUX MODES DE GÉNÉRATION
@@ -458,7 +465,8 @@ RÈGLES ABSOLUES — NE JAMAIS VIOLER
 ✗ JAMAIS de boucles for/while/Pour/Tant que dans l'algorithmique
 ✗ JAMAIS de contraintes hors machine (recopier sur papier, etc.)
 ✗ JAMAIS d'image qui montre directement la notion à découvrir
-✗ JAMAIS de guillemets dans les formules — utiliser apostrophes (')
+✗ JAMAIS de guillemets doubles (") dans les formules ou dans le texte (utiliser « » ou ')
+✗ JAMAIS de sauts de ligne réels non échappés à l'intérieur des valeurs textuelles
 ✗ JAMAIS de texte parasite avant ou après le JSON
 ✗ JAMAIS de balises markdown (pas de ```json)
 
