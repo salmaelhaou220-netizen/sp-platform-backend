@@ -285,45 +285,91 @@ STRUCTURE OBLIGATOIRE DU JSON DE RÉPONSE
       },
 
       "questions_differenciees": {
-        "consigne_enseignant": "Texte de la consigne globale de différenciation",
+        "consigne_enseignant": "Texte de la consigne globale de différenciation (ex: Tout le monde commence la Phase 1...)",
         
         "phases_seances": [
           {
             "numero_seance": 1,
-            "titre_seance_savoir": "Ex: Séance 1 — La structure sélective simple",
-            "objectif_de_la_seance": "Faire émerger le besoin d'un choix binaire",
-            "questions": {
+            "titre_seance_savoir": "Titre de la Séance 1 avec le sous-savoir ciblé (ex: Séance 1 — La structure sélective simple)",
+            "objectif_de_la_seance": "L'objectif didactique précis de cette première étape",
+            "questions_de_la_seance": {
               "niveau_socle": [
-                { "numero": 1, "badge": "🟢 Socle", "question": "..." }
+                {
+                  "numero": 1,
+                  "badge": "🟢 Socle — Ancrage",
+                  "question": "Question d'activation des pré-requis basée sur le début du scénario",
+                  "objectif": "Rassurer et démarrer l'analyse",
+                  "metacognition": null
+                }
               ],
               "niveau_intermediaire": [
-                { "numero": 2, "badge": "⚡ Conflit Cognitif (Obstacle de la Séance)", "question": "...", "coups_de_pouce": { "niveau_1_conceptuel": "...", "niveau_2_procedural": "..." } }
+                {
+                  "numero": 2,
+                  "badge": "⚡ Conflit Cognitif (Obstacle 1)",
+                  "question": "Question plaçant l'élève face au PREMIER obstacle de la séquence (insoluble avec les acquis précédents)",
+                  "objectif": "Créer le besoin d'apprendre le savoir de la séance 1",
+                  "metacognition": "Pourquoi ta première solution automatisée a échoué ?",
+                  "coups_de_pouce": {
+                    "niveau_1_conceptuel": "Analogie ou indice d'orientation logique sans procédure technique",
+                    "niveau_2_procedural": "Indication sur la manipulation machine à tester sans donner la solution"
+                  }
+                }
               ],
               "niveau_depassement": [
-                { "numero": 3, "badge": "🔵 Institutionnalisation Inductive", "question": "En te basant sur cette phase, définis la structure sélective simple..." }
+                {
+                  "numero": 3,
+                  "badge": "🔵 Institutionnalisation Inductive",
+                  "question": "Question invitant l'élève à formuler lui-même la règle ou la définition du savoir de la séance 1",
+                  "objectif": "Faire émerger la première trace écrite",
+                  "metacognition": "Quels termes techniques as-tu découverts et utilisés ?"
+                }
               ]
             }
           },
           {
             "numero_seance": 2,
-            "titre_seance_savoir": "Ex: Séance 2 — Les structures imbriquées",
-            "objectif_de_la_seance": "Ajouter une contrainte de choix multiples au même scénario",
-            "questions": {
+            "titre_seance_savoir": "Titre de la Séance 2 (ex: Séance 2 — Les structures sélectives imbriquées)",
+            "objectif_de_la_seance": "Complexification du même scénario initial avec une nouvelle contrainte",
+            "questions_de_la_seance": {
               "niveau_socle": [
-                { "numero": 4, "badge": "🟢 Socle (Reprise du code de la Séance 1)", "question": "..." }
+                {
+                  "numero": 4,
+                  "badge": "🟢 Socle — Réinvestissement",
+                  "question": "Question qui repart du code ou de la solution validée à la séance 1",
+                  "objectif": "Vérifier la base avant d'ajouter la complexité",
+                  "metacognition": null
+                }
               ],
               "niveau_intermediaire": [
-                { "numero": 5, "badge": "⚡ Conflit Cognitif (Nouvel Obstacle : Imbrication)", "question": "...", "coups_de_pouce": { "niveau_1_conceptuel": "...", "niveau_2_procedural": "..." } }
+                {
+                  "numero": 5,
+                  "badge": "⚡ Conflit Cognitif (Obstacle 2)",
+                  "question": "Question qui introduit la nouvelle contrainte sur le MÊME projet (génère le besoin d'imbriquer ou de combiner)",
+                  "objectif": "Créer le besoin d'apprendre le savoir de la séance 2",
+                  "metacognition": "Que se passe-t-il si tu tentes d'utiliser uniquement la structure simple de la séance précédente ?",
+                  "coups_de_pouce": {
+                    "niveau_1_conceptuel": "Indice conceptuel sur la manière d'emboîter les choix",
+                    "niveau_2_procedural": "Indication machine sur la syntaxe ou la logique à tester"
+                  }
+                }
               ],
               "niveau_depassement": [
-                { "numero": 6, "badge": "🔵 Institutionnalisation / Transfert", "question": "Rédige la règle de l'imbrication..." }
+                {
+                  "numero": 6,
+                  "badge": "🔵 Institutionnalisation / Transfert",
+                  "question": "Question de formalisation inductive du second savoir ou exercice de transfert autonome",
+                  "objectif": "Valider la généralisation du concept",
+                  "metacognition": "En quoi cette solution est-elle plus performante que celle de la séance 1 ?"
+                }
               ]
             }
           }
         ],
 
         "criteres_reussite_globaux": [
-          "L'élève a produit le livrable final du projet évolutif..."
+          "L'élève a complété l'ensemble des phases du projet fil conducteur",
+          "L'élève est capable d'expliquer l'évolution de son travail entre la première et la dernière séance",
+          "Les définitions rédigées de manière inductive couvrent l'intégralité de la séquence"
         ]
       },
 
