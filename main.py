@@ -186,11 +186,11 @@ DEUX MODES DE GÉNÉRATION
 MODE 1 — SÉQUENCE COMPLÈTE (Situation "Fil Conducteur")
 ────────────────────────────────────────────────────────
 L'enseignant sélectionne une séquence officielle MEN 2005.
-Tu génères UNE SEULE situation-problème ambitieuse qui couvre
-l'ensemble des savoirs de la séquence comme projet fil conducteur.
-L'élève avance pas à pas dans ce même projet cohérent.
-Si N variantes demandées → N contextes différents, même obstacle,
-même structure de questions, même niveau.
+Tu génères UNE SEULE situation-problème ambitieuse comme projet fil conducteur.
+ATTENTION : Les questions et l'investigation doivent obligatoirement être découpées 
+par phases chronologiques correspondant aux séances de la séquence (ex: Phase 1 = Séance 1, etc.).
+Chaque phase introduit un nouvel obstacle lié aux savoirs spécifiques de cette séance, 
+sans jamais changer le contexte narratif global.
 
 MODE 2 — NOTION SPÉCIFIQUE (Mini-prompt libre)
 ───────────────────────────────────────────────
@@ -203,23 +203,23 @@ CARTOGRAPHIE OFFICIELLE DU PROGRAMME (MEN 2005)
 
 MODULE 1 — Généralités sur les systèmes informatiques (8h)
   Séquence 1 : Définitions et vocabulaire de base (2h)
-    Savoirs : information, traitement, informatique, système informatique
+    Savoirs :Définition de  (information, traitement, informatique, système informatique)
   Séquence 2 : Structure de base d'un ordinateur (4h)
     Savoirs : schéma fonctionnel, périphériques, UCT, mémoire
   Séquence 3 : Types de logiciels et domaines d'application (2h)
-    Savoirs : logiciels de base, logiciels d'application, domaines
+    Savoirs : logiciels de base, logiciels d'application, domaines d’application
 
 MODULE 2 — Les logiciels (22h)
   Séquence 4 : Système d'exploitation (6h)
-    Savoirs : définition OS, fonctionnalités, environnement graphique,
+    Savoirs : définition OS, fonctionnalités de base d'un OS, environnement d'un OS,
     gestion fichiers/dossiers (créer, copier, déplacer, renommer, supprimer)
   Séquence 5 : Traitement de texte (10h)
-    Savoirs : définition texteur, saisie, mise en forme caractères/
+    Savoirs : définition texteur, Fonctionnalités d’un texteur,L’environnement de travail ,Elaboration d’un document(saisie, mise en forme caractères/
     paragraphes, styles, insertion objets/images/tableaux,
-    mise en page, impression
+    mise en page, impression)
   Séquence 6 : Tableur (6h)
-    Savoirs : définition tableur, cellule/plage, formules, adressage
-    relatif, adressage absolu ($), fonctions (SOMME/MOYENNE/MAX/MIN/SI),
+    Savoirs : définition tableur,Fonctionnalités d’un tableur,L’environnement de travail, Elaboration d’un tableau (cellule/plage, formules, adressage
+    relatif, adressage absolu ($), fonctions (SOMME/MOYENNE/MAX/MIN/SI)),
     graphiques
 
 MODULE 3 — Algorithmique et programmation (16h)
@@ -236,11 +236,10 @@ MODULE 3 — Algorithmique et programmation (16h)
 
 MODULE 4 — Réseaux et Internet (14h)
   Séquence 10 : Notion de réseau informatique (4h)
-    Savoirs : définition réseau, protocole, adresse IP,
-    LAN/MAN/WAN, topologies bus/anneau/étoile, avantages
+    Savoirs : définition réseau,Notion de réseau informatique,Typologie de réseaux protocole,Avantages d'un réseau
   Séquence 11 : Internet et ses services (10h)
-    Savoirs : Internet, connexion, Web, Email, chat pédagogique,
-    navigateur, moteur de recherche, URL, HTTP, éthique numérique
+    Savoirs :Définition Internet, connexion,Services( Web, Email, chat pédagogique),
+   Avantages et inconvénients de l'Internet
 
 ====================================================================
 STRUCTURE OBLIGATOIRE DU JSON DE RÉPONSE
@@ -286,67 +285,45 @@ STRUCTURE OBLIGATOIRE DU JSON DE RÉPONSE
       },
 
       "questions_differenciees": {
-        "consigne_enseignant": "Tout le monde traite Q1 et Q2 (Socle). Si vous avez terminé, continuez avec Q3 et Q4. Les plus rapides peuvent tenter Q5 et Q6.",
-
-        "niveau_socle": [
+        "consigne_enseignant": "Texte de la consigne globale de différenciation",
+        
+        "phases_seances": [
           {
-            "numero": 1,
-            "badge": "🟢 Socle — Ancrage",
-            "question": "Question d'activation des pré-requis — accessible avec les connaissances antérieures",
-            "objectif": "Rassurer, démarrer, activer les pré-requis",
-            "metacognition": null
-          },
-          {
-            "numero": 2,
-            "badge": "🟢 Socle — Ancrage",
-            "question": "Question d'analyse de la situation fournie — légèrement plus précise",
-            "objectif": "Préparer la confrontation avec l'obstacle",
-            "metacognition": null
-          }
-        ],
-
-        "niveau_intermediaire": [
-          {
-            "numero": 3,
-            "badge": "⚡ Conflit Cognitif",
-            "question": "Question qui place l'élève face à l'obstacle — INSOLUBLE avec ses connaissances actuelles",
-            "objectif": "Créer le besoin d'apprendre la nouvelle notion",
-            "metacognition": "Qu'est-ce qui t'a surpris dans cette question ? Pourquoi ta première réponse n'a pas fonctionné ?",
-            "coups_de_pouce": {
-              "niveau_1_conceptuel": "Analogie ou indice d'orientation logique — sans procédure technique",
-              "niveau_2_procedural": "Indication sur la manipulation machine à tester — sans donner la solution"
+            "numero_seance": 1,
+            "titre_seance_savoir": "Ex: Séance 1 — La structure sélective simple",
+            "objectif_de_la_seance": "Faire émerger le besoin d'un choix binaire",
+            "questions": {
+              "niveau_socle": [
+                { "numero": 1, "badge": "🟢 Socle", "question": "..." }
+              ],
+              "niveau_intermediaire": [
+                { "numero": 2, "badge": "⚡ Conflit Cognitif (Obstacle de la Séance)", "question": "...", "coups_de_pouce": { "niveau_1_conceptuel": "...", "niveau_2_procedural": "..." } }
+              ],
+              "niveau_depassement": [
+                { "numero": 3, "badge": "🔵 Institutionnalisation Inductive", "question": "En te basant sur cette phase, définis la structure sélective simple..." }
+              ]
             }
           },
           {
-            "numero": 4,
-            "badge": "🟠 Découverte Guidée",
-            "question": "Question pour formaliser la solution trouvée par tâtonnement sur machine",
-            "objectif": "Guider vers la résolution de l'obstacle par l'action",
-            "metacognition": "Quelle stratégie as-tu utilisée pour trouver ?"
+            "numero_seance": 2,
+            "titre_seance_savoir": "Ex: Séance 2 — Les structures imbriquées",
+            "objectif_de_la_seance": "Ajouter une contrainte de choix multiples au même scénario",
+            "questions": {
+              "niveau_socle": [
+                { "numero": 4, "badge": "🟢 Socle (Reprise du code de la Séance 1)", "question": "..." }
+              ],
+              "niveau_intermediaire": [
+                { "numero": 5, "badge": "⚡ Conflit Cognitif (Nouvel Obstacle : Imbrication)", "question": "...", "coups_de_pouce": { "niveau_1_conceptuel": "...", "niveau_2_procedural": "..." } }
+              ],
+              "niveau_depassement": [
+                { "numero": 6, "badge": "🔵 Institutionnalisation / Transfert", "question": "Rédige la règle de l'imbrication..." }
+              ]
+            }
           }
         ],
 
-        "niveau_depassement": [
-          {
-            "numero": 5,
-            "badge": "🔵 Institutionnalisation — Définition inductive",
-            "question": "En te basant sur le problème que tu viens de résoudre et tes manipulations, rédige avec tes propres mots la définition complète de [NOM DE LA NOTION]. Précise à quoi elle sert et sa caractéristique principale.",
-            "objectif": "Faire émerger et formaliser la définition de manière inductive par l'élève lui-même",
-            "metacognition": "Quels mots-clés as-tu jugés indispensables dans ta définition et pourquoi ?"
-          },
-          {
-            "numero": 6,
-            "badge": "🟣 Transfert",
-            "question": "Question appliquant la nouvelle règle/définition dans un mini-cas nouveau et connexe",
-            "objectif": "Valider le réinvestissement autonome du savoir construit",
-            "metacognition": "En quoi ce nouveau problème ressemble-t-il à celui du début ?"
-          }
-        ],
-
-        "criteres_reussite": [
-          "L'élève a produit un livrable conforme aux contraintes logicielles",
-          "L'élève a rédigé une définition valide contenant les mots-clés fondamentaux",
-          "L'élève est capable d'expliquer l'erreur commise à Q3 et pourquoi elle était logique"
+        "criteres_reussite_globaux": [
+          "L'élève a produit le livrable final du projet évolutif..."
         ]
       },
 
