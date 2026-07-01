@@ -5,7 +5,7 @@ from typing import Optional
 import os, json, time
 from mistralai import Mistral
 
-app = FastAPI(title="SP Platform API v5.3", version="5.3.0")
+app = FastAPI(title="SP Platform API v5.5", version="5.5.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -846,12 +846,115 @@ SEQUENCES = {
     ]
 }
 
+# ====================================================================
+# NOUVEAU (V5.5) — Cartographie des savoirs atomiques par séquence.
+# Les clés sont EXACTEMENT les mêmes chaînes que celles utilisées dans
+# SEQUENCES ci-dessus : aucune modification du frontend n'est requise,
+# le champ "sequence" déjà envoyé par GenerateSP.tsx sert de clé de
+# recherche directe.
+# Doit rester synchronisé avec la section "CARTOGRAPHIE OFFICIELLE"
+# du SYSTEM_PROMPT_GENERATION ci-dessus (même liste, même ordre).
+# ====================================================================
+CARTOGRAPHIE_SAVOIRS = {
+    "Séquence 1 : Définitions et vocabulaire de base": {
+        "module": "Module 1 — Généralités sur les systèmes informatiques",
+        "savoirs_atomiques": [
+            "information et traitement de l'information",
+            "informatique et système informatique",
+        ],
+    },
+    "Séquence 2 : Structure de base d'un ordinateur": {
+        "module": "Module 1 — Généralités sur les systèmes informatiques",
+        "savoirs_atomiques": [
+            "schéma fonctionnel d'un ordinateur",
+            "les périphériques (entrée/sortie)",
+            "unité centrale de traitement",
+        ],
+    },
+    "Séquence 3 : Types de logiciels et domaines d'application": {
+        "module": "Module 1 — Généralités sur les systèmes informatiques",
+        "savoirs_atomiques": [
+            "logiciels de base et logiciels d'application",
+            "domaines d'application de l'informatique",
+        ],
+    },
+    "Séquence 4 : Système d'exploitation": {
+        "module": "Module 2 — Les logiciels",
+        "savoirs_atomiques": [
+            "environnement graphique et fonctionnalités de base d'un OS",
+            "gestion des fichiers et dossiers (créer, copier, déplacer, renommer, supprimer)",
+        ],
+    },
+    "Séquence 5 : Traitement de texte": {
+        "module": "Module 2 — Les logiciels",
+        "savoirs_atomiques": [
+            "saisie et mise en forme des caractères",
+            "mise en forme des paragraphes et styles",
+            "insertion d'objets (tableaux, images)",
+            "mise en page et impression",
+        ],
+    },
+    "Séquence 6 : Tableur": {
+        "module": "Module 2 — Les logiciels",
+        "savoirs_atomiques": [
+            "cellules, plages et formules de base",
+            "adressage relatif et adressage absolu ($)",
+            "fonctions (SOMME, MOYENNE, MAX, MIN, SI)",
+            "graphiques",
+        ],
+    },
+    "Séquence 7 : Notion d'algorithme et instructions de base": {
+        "module": "Module 3 — Algorithmique et programmation",
+        "savoirs_atomiques": [
+            "constante, variable et types (entier/réel/caractère/booléen)",
+            "instructions de lecture et d'écriture",
+            "instruction d'affectation",
+        ],
+    },
+    "Séquence 8 : Structures de contrôle": {
+        "module": "Module 3 — Algorithmique et programmation",
+        "savoirs_atomiques": [
+            "structure séquentielle",
+            "structure sélective simple (Si...Alors...Sinon)",
+            "structure sélective imbriquée et à choix multiple (Selon...Cas)",
+        ],
+    },
+    "Séquence 9 : Langages de programmation": {
+        "module": "Module 3 — Algorithmique et programmation",
+        "savoirs_atomiques": [
+            "notion de programme et langages structurés",
+            "transcription d'un algorithme en langage de programmation (Pascal ou équivalent)",
+        ],
+    },
+    "Séquence 10 : Notion de réseau informatique": {
+        "module": "Module 4 — Réseaux et Internet",
+        "savoirs_atomiques": [
+            "définition d'un réseau, protocole et adresse",
+            "typologie des réseaux (LAN/MAN/WAN, topologies bus/anneau/étoile)",
+            "avantages et inconvénients d'un réseau",
+        ],
+    },
+    "Séquence 11 : Internet et ses services": {
+        "module": "Module 4 — Réseaux et Internet",
+        "savoirs_atomiques": [
+            "définition d'Internet et connexion",
+            "navigateur, moteur de recherche et URL",
+            "services de communication (Email, chat pédagogique)",
+            "avantages, inconvénients et éthique numérique",
+        ],
+    },
+}
+
+
 class GenerateRequest(BaseModel):
     mode: str = "sequence"
     module: str = ""
     sequence: Optional[str] = None
     mini_prompt: Optional[str] = None
-    type_sp: str = "didactique"
+    # NOTE (V5.5) : "type_sp" retiré — toutes les SP générées sont désormais
+    # exclusivement didactiques. Si le frontend envoie encore ce champ dans
+    # le corps de la requête, Pydantic l'ignore silencieusement (extra
+    # field), donc aucune casse immédiate même sans mise à jour du frontend.
     nombre_variantes: int = 1
     niveau_difficulte: str = "intermediaire"
     langue: str = "francais"
@@ -891,7 +994,7 @@ def call_mistral(user_prompt: str, system_prompt: str, retries: int = 3):
 
 @app.get("/")
 def root():
-    return {"status": "ok", "version": "5.3.0", "model": "mistral-large-latest", "message": "SP Platform API is running"}
+    return {"status": "ok", "version": "5.5.0", "model": MODEL, "message": "SP Platform API is running"}
 
 @app.get("/sequences")
 def get_sequences():
@@ -900,12 +1003,23 @@ def get_sequences():
 @app.post("/generate-sp")
 def generate_sp(req: GenerateRequest):
     nombre = max(1, min(5, req.nombre_variantes))
+
     if req.mode == "sequence":
+        # --- NOUVEAU (V5.5) : lookup des savoirs atomiques de la séquence ---
+        if not req.sequence or req.sequence not in CARTOGRAPHIE_SAVOIRS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Séquence inconnue ou non fournie : {req.sequence!r}"
+            )
+
+        info = CARTOGRAPHIE_SAVOIRS[req.sequence]
+        savoirs = info["savoirs_atomiques"]
+
         prompt = json.dumps({
             "mode": "sequence",
-            "module": req.module,
+            "module": info["module"],
             "sequence": req.sequence,
-            "type_sp": req.type_sp,
+            "savoirs_a_couvrir": savoirs,
             "nombre_variantes": nombre,
             "niveau_difficulte": req.niveau_difficulte,
             "langue": req.langue
@@ -915,11 +1029,29 @@ def generate_sp(req: GenerateRequest):
             "mode": "notion",
             "mini_prompt": req.mini_prompt,
             "module": req.module,
-            "type_sp": req.type_sp,
             "langue": req.langue
         }, ensure_ascii=False)
 
     result = call_mistral(prompt, SYSTEM_PROMPT_GENERATION)
+
+    # --- NOUVEAU (V5.5) : filet de sécurité — vérifie que tous les savoirs
+    # attendus sont bien couverts. Si des savoirs manquent, on relance UNE
+    # fois avec un message correctif explicite avant de renvoyer le résultat.
+    if req.mode == "sequence":
+        attendus = set(savoirs)
+        recus = set(result.get("savoirs_couverts", []))
+        if attendus != recus:
+            manquants = list(attendus - recus)
+            if manquants:
+                prompt_corrige = (
+                    prompt
+                    + f"\n\nATTENTION : ta génération précédente n'a pas couvert "
+                      f"ces savoirs : {manquants}. Régénère intégralement en "
+                      f"couvrant EXACTEMENT tous les éléments de savoirs_a_couvrir, "
+                      f"un palier par savoir, dans le même ordre."
+                )
+                result = call_mistral(prompt_corrige, SYSTEM_PROMPT_GENERATION)
+
     return {"success": True, "data": result}
 
 @app.post("/evaluate-sp")
