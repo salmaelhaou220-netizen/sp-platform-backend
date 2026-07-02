@@ -964,7 +964,28 @@ class EvaluateRequest(BaseModel):
     seance: str
     situation_probleme: str
 
-def call_mistral(user_prompt: str, system_prompt: str, retries: int = 3):
+def estimer_max_tokens(nb_paliers: int, nb_variantes: int) -> int:
+    """
+    Estime le budget de tokens nécessaire en sortie selon le nombre de
+    paliers et de variantes demandés. Un palier complet (obstacle,
+    situation partielle, 6 questions + coups de pouce, simulateur 3
+    profils, 4 phases de mise en œuvre, synthèse) représente environ
+    3000 à 3500 tokens en français. Le socle commun à chaque variante
+    (multimodal_global, fil_conducteur, séance de synthèse finale,
+    auto-évaluation) représente environ 1500 tokens.
+    Le résultat est plafonné à 32000 pour rester raisonnable en coût
+    et en latence, même si cela suppose de réduire nombre_variantes
+    pour les séquences à beaucoup de paliers (voir clamp dans
+    generate_sp).
+    """
+    base_par_variante = 1500
+    par_palier = 3200
+    total = (base_par_variante + par_palier * nb_paliers) * nb_variantes
+    return max(4000, min(total, 32000))
+
+
+def call_mistral(user_prompt: str, system_prompt: str, max_tokens: int = 8000, retries: int = 3):
+    current_max_tokens = max_tokens
     for attempt in range(retries):
         try:
             response = client.chat.complete(
@@ -974,7 +995,8 @@ def call_mistral(user_prompt: str, system_prompt: str, retries: int = 3):
                     {"role": "user", "content": user_prompt},
                 ],
                 temperature=0.7,
-                max_tokens=8000,
+                max_tokens=current_max_tokens,
+                response_format={"type": "json_object"},
             )
             raw = response.choices[0].message.content.strip()
             if raw.startswith("```"):
@@ -985,7 +1007,13 @@ def call_mistral(user_prompt: str, system_prompt: str, retries: int = 3):
             return json.loads(raw.strip())
         except json.JSONDecodeError as e:
             if attempt == retries - 1:
-                raise HTTPException(status_code=500, detail=f"JSON invalide: {str(e)}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"JSON invalide après {retries} tentatives (max_tokens={current_max_tokens}): {str(e)}"
+                )
+            # La réponse a probablement été tronquée : on augmente le budget
+            # de tokens avant de réessayer, plutôt que de réessayer à l'identique.
+            current_max_tokens = min(int(current_max_tokens * 1.6), 32000)
             time.sleep(2 ** attempt)
         except Exception as e:
             if attempt == retries - 1:
@@ -1014,6 +1042,15 @@ def generate_sp(req: GenerateRequest):
 
         info = CARTOGRAPHIE_SAVOIRS[req.sequence]
         savoirs = info["savoirs_atomiques"]
+        nb_paliers = len(savoirs)
+
+        # --- NOUVEAU : garde-fou sur le nombre de variantes pour les
+        # séquences à beaucoup de paliers, afin d'éviter des payloads
+        # démesurés même avec le budget de tokens augmenté.
+        if nb_paliers >= 3 and nombre > 2:
+            nombre = 2
+
+        max_tok = estimer_max_tokens(nb_paliers, nombre)
 
         prompt = json.dumps({
             "mode": "sequence",
@@ -1025,6 +1062,7 @@ def generate_sp(req: GenerateRequest):
             "langue": req.langue
         }, ensure_ascii=False)
     else:
+        max_tok = estimer_max_tokens(1, 1)
         prompt = json.dumps({
             "mode": "notion",
             "mini_prompt": req.mini_prompt,
@@ -1032,7 +1070,7 @@ def generate_sp(req: GenerateRequest):
             "langue": req.langue
         }, ensure_ascii=False)
 
-    result = call_mistral(prompt, SYSTEM_PROMPT_GENERATION)
+    result = call_mistral(prompt, SYSTEM_PROMPT_GENERATION, max_tokens=max_tok)
 
     # --- NOUVEAU (V5.5) : filet de sécurité — vérifie que tous les savoirs
     # attendus sont bien couverts. Si des savoirs manquent, on relance UNE
@@ -1050,7 +1088,7 @@ def generate_sp(req: GenerateRequest):
                       f"couvrant EXACTEMENT tous les éléments de savoirs_a_couvrir, "
                       f"un palier par savoir, dans le même ordre."
                 )
-                result = call_mistral(prompt_corrige, SYSTEM_PROMPT_GENERATION)
+                result = call_mistral(prompt_corrige, SYSTEM_PROMPT_GENERATION, max_tokens=max_tok)
 
     return {"success": True, "data": result}
 
